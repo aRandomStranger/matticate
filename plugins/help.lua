@@ -12,11 +12,11 @@ I'm matticate, a counter-part administration bot to mattata and a de-crapified v
 • I can *warn* users, and perform a configurable action on them when they reach the maximum number of warnings
 • I can also warn, kick or ban users when they post specific types of media
 
-I work at my best when I\'m an administrator in your group (otherwise I won't be able to kick or ban users)
+I work at my best when I'm an administrator in your group (otherwise I won't be able to kick or ban users)
 ]]
-	elseif key == 'all' then
+	elseif key == 'user_commands' then
 		return [[
-*Commands for all users*:
+*User Commands*
 
 /dashboard - Shows information about the specified group, in a private message.
 /rules - Shows the group rules, in a private message.
@@ -26,18 +26,18 @@ I work at my best when I\'m an administrator in your group (otherwise I won't be
 /groups - Show the list of the discussion groups.
 /help - Shows this message.
 ]]
-	elseif key == 'mods_info' then
+	elseif key == 'edit_group_information' then
 		return [[
-*Admins | Information about the specified group*
+*Information about the specified group*
 
 /setrules <group rules> - Set (or update) rules for the group.
 /setlink <link> - Set the link for the group. If the group is a public supergroup, you can just send /setlink.
 /link - View the group's link.
 /msglink - Get the link to a specified message. This only works in public supergroups.
 ]]
-	elseif key == 'mods_banhammer' then
+	elseif key == 'edit_banhammer' then
 		return [[
-*Admins | Banhammer Powers*
+*Banhammer Powers*
 
 /kick <username/id> = Kicks the specified user from the group.
 /ban <username/id> = Ban the specified user from the group.
@@ -46,47 +46,21 @@ I work at my best when I\'m an administrator in your group (otherwise I won't be
 /user <username/id> - Shows how many times the user has been banned in all matticate-administrated groups, and the warnings he/she has received.
 /status <username/id> - Show the current status of the specified user.
 ]]
-	elseif key == 'mods_flood' then
+	elseif key == 'edit_flood_manager' then
 		return [[
-*Admins | Flood Settings*
-
-`/config` command, then `antiflood` button: manage the flood settings in private, with an inline keyboard. You can change the sensitivity, the action (kick/ban), and even set some exceptions.
-`/antiflood [number]` = set how many messages a user can write in 5 seconds.
-_Note_ : the number must be higher than 3 and lower than 26.
+*Flood Settings*
 ]]
-	elseif key == 'mods_media' then
+	elseif key == 'edit_media_settings' then
 		return [[
-*Admins | Media Settings*
-
-`/config` command, then `media` button = receive via private message an inline keyboard to change all the media settings.
-`/warnmax media [number]` = set the max number of warnings before be kicked/banned for have sent a forbidden media.
-`/nowarns (by reply)` = reset the number of warnings for the users (*NOTE: both regular warnings and media warnings*).
-
-*List of supported media*: _image, audio, video, sticker, gif, voice, contact, file, link, telegram.me links_
+*Media Settings*
 ]]
-	elseif key == 'mods_welcome' then
+	elseif key == 'edit_welcome_settings' then
 		return [[
-*Admins | Welcome Settings*
-
-`/config`, then `menu` tab = receive in private the menu keyboard. You will find an option to enable/disable welcome and goodbye messages.
-
-*Custom welcome message*:
-`/welcome Welcome $name, enjoy the group!`
-Write after `/welcome` your welcome message. You can use some placeholders to include the name/username/id of the new member of the group
-Placeholders:
-`$username`: _will be replaced with the username_
-`$name`: _will be replaced with the name_
-`$id`: _will be replaced with the id_
-`$title`: _will be replaced with the group title_
-`$surname`: _will be replaced by the user's last name_
-`$rules`: _will be replaced by a link to the rules of the group. Please read_ [here](https://telegram.me/GroupButler_beta/26) _how to use it, or you will get an error for sure_
-
-*GIF/sticker as welcome message*
-You can use a particular gif/sticker as welcome message. To set it, reply to the gif/sticker you want to set as welcome message with `/welcome`
+*Welcome Settings*
 ]]
-	elseif key == 'mods_extra' then
+	elseif key == 'edit_extra_commands' then
 		return [[
-*Admins | Extra Commands*
+*Extra Commands*
 
 /extra <#trigger> <response> - Creates a custom #command in your group.
 /extra list - Returns a list of all of your custom commands.
@@ -94,28 +68,17 @@ You can use a particular gif/sticker as welcome message. To set it, reply to the
 
 For example, executing the command '/extra #ping Pong!' will configure me to reply with 'Pong!' every time somebody sends #ping in your group. This works with media too, by replying to the media with '/extra #trigger'.
 ]]
-	elseif key == 'mods_warns' then
+	elseif key == 'edit_warnings' then
 		return [[
-*Admins | Warnings*
+*Warnings*
 
 /warn <username/id> - Warn the specified user. Once the maximum number of warnings allowed is reached, he/she will be kicked/banned - depending on how you\'ve configured me for your group.
 
 Use /user to view information about the specified user, including the amount of warns they have received.
 ]]
-	elseif key == 'mods_chars' then
+	elseif key == 'edit_general_settings' then
 		return [[
-*Admins | Special Characters*
-]]
-	elseif key == 'mods_pin' then
-		return [[
-*Admins | Pinned Message*
-
-/pin <text>` - Sends the inputted text, Markdown-formatted, suitable to be pinned in your group.
-/editpin <text> - Edit the previous text sent with /pin, for when sending a new large block of text would be inconvenient.
-]]
-	elseif key == 'mods_settings' then
-		return [[
-*Admins | Group Settings*
+*Group Settings*
 
 /config - Manage the group\'s settings via private message.
 
@@ -128,27 +91,25 @@ Media - Choose which media to prohibit in your group, and set the number of time
 		error('Bad Key.')
 	end
 end
-local function make_keyboard(mod, mod_current_position)
+local function make_keyboard(admin, admin_current_position)
 	local keyboard = {}
 	keyboard.inline_keyboard = {}
-	if mod then
+	if admin then
 	    local list = {
 	        ['Banhammer'] = 'banhammer',
-	        ['Group Info'] = 'info',
-	        ['Flood Manager'] = 'flood',
-	        ['Media Settings'] = 'media',
-	        ['Welcome Settings'] = 'welcome',
-	        ['General Settings'] = 'settings',
-	        ['Extra Commands'] = 'extra',
-	        ['Warnings'] = 'warnings',
-	        ['Characters'] = 'char',
-	        ['Pinned Message'] = 'pin'
+	        ['Group Information'] = 'group_information',
+	        ['Flood Manager'] = 'flood_manager',
+	        ['Media Settings'] = 'media_settings',
+	        ['Welcome Settings'] = 'welcome_settings',
+	        ['General Settings'] = 'general_settings',
+	        ['Extra Commands'] = 'extra_commands',
+	        ['Warnings'] = 'warnings'
         }
         local line = {}
         for k, v in pairs(list) do
             if next(line) then
                 local button = {text = k, callback_data = v}
-                if mod_current_position == v then
+                if admin_current_position == v then
                 	button.text = '💡 ' .. k
                 end
                 table.insert(line, button)
@@ -156,7 +117,7 @@ local function make_keyboard(mod, mod_current_position)
                 line = {}
             else
                 local button = {text = k, callback_data = v}
-                if mod_current_position == v:gsub('!', '') then
+                if admin_current_position == v:gsub('!', '') then
                 	button.text = '💡 ' .. k
                 end
                 table.insert(line, button)
@@ -167,10 +128,10 @@ local function make_keyboard(mod, mod_current_position)
         end
     end
     local bottom_bar
-    if mod then
-		bottom_bar = {{text = 'User Commands', callback_data = 'user'}}
+    if admin then
+		bottom_bar = {{text = 'User Commands', callback_data = 'user_commands'}}
 	else
-	    bottom_bar = {{text = 'Admin Commands', callback_data = 'mod'}}
+	    bottom_bar = {{text = 'Admin Commands', callback_data = 'admin_commands'}}
 	end
 	table.insert(bottom_bar, {text = 'Information', callback_data = 'fromhelp:about'})
 	table.insert(keyboard.inline_keyboard, bottom_bar)
@@ -183,7 +144,7 @@ local function do_keyboard_private()
     		{text = 'Official Channel', url = 'https://telegram.me/' .. config.channel:gsub('@', '')}
 	    },
 	    {
-	        {text = 'All Commands', callback_data = 'user'}
+	        {text = 'All Commands', callback_data = 'user_commands'}
         }
     }
     return keyboard
@@ -209,7 +170,7 @@ local action = function(msg, blocks)
     if blocks[1] == 'help' then
     	if msg.chat.type == 'private' then
 			local keyboard = make_keyboard()
-			api.sendKeyboard(msg.from.id, get_helped_string('all'), keyboard, true)
+			api.sendKeyboard(msg.from.id, get_helped_string('user_commands'), keyboard, true)
         end
     end
     if msg.cb then
@@ -220,57 +181,49 @@ local action = function(msg, blocks)
 		    api.editMessageText(msg.chat.id, msg.message_id, 'Here are some useful links:', keyboard, true)
 		    return
 		end
-        local with_mods_lines = true
-        if query == 'user' then
-            text = get_helped_string('all')
-            with_mods_lines = false
-        elseif query == 'mod' then
+        local with_admin_lines = true
+        if query == 'user_commands' then
+            text = get_helped_string('user_commands')
+            with_admin_lines = false
+        elseif query == 'admin_commands' then
             text = 'Tap on a button to see the *related commands*.'
-        elseif query == 'info' then
-        	text = get_helped_string('mods_info')
+        elseif query == 'group_information' then
+        	text = get_helped_string('edit_group_information')
         elseif query == 'banhammer' then
-        	text = get_helped_string('mods_banhammer')
-        elseif query == 'flood' then
-        	text = get_helped_string('mods_flood')
-        elseif query == 'media' then
-        	text = get_helped_string('mods_media')
-        elseif query == 'welcome' then
-        	text = get_helped_string('mods_welcome')
-        elseif query == 'extra' then
-        	text = get_helped_string('mods_extra')
+        	text = get_helped_string('edit_banhammer')
+        elseif query == 'flood_manager' then
+        	text = get_helped_string('edit_flood_manager')
+        elseif query == 'media_settings' then
+        	text = get_helped_string('edit_media_settings')
+        elseif query == 'welcome_settings' then
+        	text = get_helped_string('edit_welcome_settings')
+        elseif query == 'extra_commands' then
+        	text = get_helped_string('edit_extra_commands')
         elseif query == 'warnings' then
-        	text = get_helped_string('mods_warns')
-        elseif query == 'char' then
-        	text = get_helped_string('mods_chars')
-        elseif query == 'pin' then
-        	text = get_helped_string('mods_pin')
-        elseif query == 'settings' then
-        	text = get_helped_string('mods_settings')
+        	text = get_helped_string('edit_warnings')
+        elseif query == 'general_settings' then
+        	text = get_helped_string('edit_general_settings')
         end
-        local keyboard = make_keyboard(with_mods_lines, query)
+        local keyboard = make_keyboard(with_admin_lines, query)
         local res, code = api.editMessageText(msg.chat.id, msg.message_id, text, keyboard, true)
         if not res and code and code == 111 then
             api.answerCallbackQuery(msg.cb_id, 'You\'re already in this section.')
-		elseif query == 'info' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Group Information')
+		elseif query == 'group_information' then
+			api.answerCallbackQuery(msg.cb_id, 'Group Information')
 		elseif query == 'banhammer' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Banhammer Powers')
-		elseif query == 'flood' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Anti-Flood Settings')
-		elseif query == 'media' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Media Settings')
-		elseif query == 'pin' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Pinned Message')
-		elseif query == 'welcome' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Welcome Settings')
-		elseif query == 'extra' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Extra Commands')
+			api.answerCallbackQuery(msg.cb_id, 'Banhammer')
+		elseif query == 'flood_manager' then
+			api.answerCallbackQuery(msg.cb_id, 'Flood Manager')
+		elseif query == 'media_settings' then
+			api.answerCallbackQuery(msg.cb_id, 'Media Settings')
+		elseif query == 'welcome_settings' then
+			api.answerCallbackQuery(msg.cb_id, 'Welcome Settings')
+		elseif query == 'extra_commands' then
+			api.answerCallbackQuery(msg.cb_id, 'Extra Commands')
 		elseif query == 'warnings' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Warnings')
-		elseif query == 'char' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Special Characters')
-		elseif query == 'settings' then
-			api.answerCallbackQuery(msg.cb_id, 'Admins | Group Settings')
+			api.answerCallbackQuery(msg.cb_id, 'Warnings')
+		elseif query == 'general_settings' then
+			api.answerCallbackQuery(msg.cb_id, 'General Settings')
         end
     end
 end
@@ -280,17 +233,15 @@ return {
 	triggers = {
 	    config.cmd .. '(start)$',
 	    config.cmd .. '(help)$',
-	    '^###cb:(user)$',
-	    '^###cb:(mod)$',
-	    '^###cb:(info)$',
+	    '^###cb:(user_commands)$',
+	    '^###cb:(admin_commands)$',
+	    '^###cb:(group_information)$',
 	    '^###cb:(banhammer)$',
-	    '^###cb:(flood)$',
-	    '^###cb:(media)$',
-	    '^###cb:(pin)$',
-	    '^###cb:(welcome)$',
-	    '^###cb:(extra)$',
+	    '^###cb:(flood_manager)$',
+	    '^###cb:(media_settings)$',
+	    '^###cb:(welcome_settings)$',
+	    '^###cb:(extra_commands)$',
 	    '^###cb:(warnings)$',
-	    '^###cb:(char)$',
-	    '^###cb:(settings)$'
+	    '^###cb:(general_settings)$'
     }
 }
