@@ -1,28 +1,26 @@
 local function doKeyboard_media(chat_id)
-	if not ln then
-		ln = 'en'
-	end
+	ln = 'en'
     local keyboard = {}
     keyboard.inline_keyboard = {}
     for media, default_status in pairs(config.chat_settings['media']) do
     	local status = (db:hget('chat:' .. chat_id .. ':media', media)) or default_status
         if status == 'ok' then
-            status = '✅'
+            status = 'Allowed'
         else
-            status = '❌'
+            status = 'Forbid'
         end
 
 		local media_texts = {
-			image = _("Images"),
-			gif = _("GIFs"),
-			video = _("Videos"),
-			file = _("Documents"),
-			TGlink = _("telegram.me links"),
-			voice = _("Vocal messages"),
-			link = _("Links"),
-			audio = _("Music"),
-			sticker = _("Stickers"),
-			contact = _("Contacts"),
+			image = 'Images',
+			gif = 'GIFs',
+			video = 'Videos',
+			file = 'Documents',
+			TGlink = 'Telegram Links',
+			voice = 'Voice Messages',
+			link = 'Links',
+			audio = 'Music',
+			sticker = 'Stickers',
+			contact = 'Contacts'
 		}
         local media_text = media_texts[media] or media
         local line = {
@@ -35,9 +33,11 @@ local function doKeyboard_media(chat_id)
     local action = (db:hget('chat:' .. chat_id .. ':warnsettings', 'mediatype')) or config.chat_settings['warnsettings']['mediatype']
 	local caption
 	if action == 'kick' then
-		caption = _("Warnings (media) 📍 %d | kick"):format(tonumber(max))
+		caption = 'Warnings (media) 📍 %d | kick'
+		caption = caption:format(tonumber(max))
 	else
-		caption = _("Warnings (media) 📍 %d | ban"):format(tonumber(max))
+		caption = 'Warnings (media) 📍 %d | ban'
+		caption = caption:format(tonumber(max))
 	end
     table.insert(keyboard.inline_keyboard, {{text = caption, callback_data = 'mediatype:' .. chat_id}})
     local warn = {
@@ -49,10 +49,9 @@ local function doKeyboard_media(chat_id)
     return keyboard
 end
 local action = function(msg, blocks)
-	local media_first = _([[
+	local media_first = [[
 Here you can change how many warnings should be given before I kick/ban someone for sending a forbidden type of media.
-]])
-
+]]
 	local chat_id = msg.target_id
 	
 	if  blocks[1] == 'config' then
@@ -60,7 +59,7 @@ Here you can change how many warnings should be given before I kick/ban someone 
 	    api.editMessageText(msg.chat.id, msg.message_id, media_first, keyboard, true)
 	else
 		if blocks[1] == 'mediaalert' then
-			api.answerCallbackQuery(msg.cb_id, _("⚠️ Tap on the right column"))
+			api.answerCallbackQuery(msg.cb_id, '⚠️ Tap on the right column')
 			return
 		end
 		local cb_text
@@ -68,14 +67,14 @@ Here you can change how many warnings should be given before I kick/ban someone 
 			local current = tonumber(db:hget('chat:' .. chat_id .. ':warnsettings', 'mediamax')) or 2
 			if blocks[2] == 'dim' then
 				if current < 2 then
-					cb_text = _('The new value needs to be greater than 1.')
+					cb_text = 'The new value needs to be greater than 1.'
 				else
 					local new = db:hincrby('chat:' .. chat_id .. ':warnsettings', 'mediamax', -1)
 					cb_text = string.format('⚙ %d → %d', current, new)
 				end
 			elseif blocks[2] == 'raise' then
 				if current > 11 then
-					cb_text = _('The new value needs to be lower than 12.')
+					cb_text = 'The new value needs to be lower than 12.'
 				else
 					local new = db:hincrby('chat:' .. chat_id .. ':warnsettings', 'mediamax', 1)
 					cb_text = string.format('⚙ %d → %d', current, new)
@@ -87,10 +86,10 @@ Here you can change how many warnings should be given before I kick/ban someone 
 			local current = (db:hget(hash, 'mediatype')) or config.chat_settings['warnsettings']['mediatype']
 			if current == 'ban' then
 				db:hset(hash, 'mediatype', 'kick')
-				cb_text = _('Users will now be kicked.')
+				cb_text = 'Users will now be kicked.'
 			else
 				db:hset(hash, 'mediatype', 'ban')
-				cb_text = _('Users will now be banned.')
+				cb_text = 'Users will now be banned.'
 			end
 		end
 		if blocks[1] == 'media' then
@@ -102,7 +101,6 @@ Here you can change how many warnings should be given before I kick/ban someone 
         api.answerCallbackQuery(msg.cb_id, cb_text)
     end
 end
-
 return {
 	action = action,
 	triggers = {
