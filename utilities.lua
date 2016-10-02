@@ -1,36 +1,27 @@
--- utilities.lua
--- Functions shared among plugins.
-
 local misc = {}
 local roles = {}
-
-function misc.get_word(s, i) -- get the indexed word in a string
-
+function misc.get_word(s, i)
 	s = s or ''
 	i = i or 1
-
 	local t = {}
 	for w in s:gmatch('%g+') do
 		table.insert(t, w)
 	end
-
 	return t[i] or false
-
 end
-
 function string:input() -- Returns the string after the first space.
 	if not self:find(' ') then
 		return false
 	end
 	return self:sub(self:find(' ')+1)
 end
-
 function string:escape()
-	if not self then return false end
+	if not self then
+		return false
+	end
 	self = self:gsub('*', '\\*'):gsub('_', '\\_'):gsub('`', '\\`'):gsub('%]', '\\]'):gsub('%[', '\\[')
 	return self
 end
-
 function string:escape_hard() -- Remove the markdown.
 	self = self:gsub('*', ''):gsub('_', ''):gsub('`', ''):gsub('%[', ''):gsub('%]', '')
 	return self
@@ -443,8 +434,7 @@ function misc.download_to_file(url, file_path)--https://github.com/yagop/telegra
 end
 
 function misc.telegram_file_link(res)
-	--res = table returned by getFile()
-	return "https://api.telegram.org/file/bot"..config.bot_api_key.."/"..res.result.file_path
+	return 'https://api.telegram.org/file/bot' .. config.bot_api_key .. '/' .. res.result.file_path
 end
 
 function misc.is_silentmode_on(chat_id)
@@ -461,7 +451,7 @@ function misc.getRules(chat_id)
 	local hash = 'chat:'..chat_id..':info'
 	local rules = db:hget(hash, 'rules')
     if not rules then
-        return _("-*empty*-")
+        return '-*empty*-'
     else
        	return rules
     end
@@ -511,35 +501,32 @@ function misc.getAdminlist(chat_id)
 end
 
 function misc.getExtraList(chat_id)
-	local hash = 'chat:'..chat_id..':extra'
+	local hash = 'chat:' .. chat_id .. ':extra'
 	local commands = db:hkeys(hash)
 	local text = ''
 	if commands[1] == nil then
-		return _("No commands set!")
+		return 'No custom commands have been set!'
 	else
 	    for k,v in pairs(commands) do
-	    	text = text..v..'\n'
+	    	text = text .. v .. '\n'
 	    end
-	    return _("List of *custom commands*:\n") .. text
+	    return 'List of *custom commands*:\n' .. text
 	end
 end
 
 function misc.getSettings(chat_id)
     local hash = 'chat:'..chat_id..':settings'
         
-    local message = _("Current settings for *the group*:\n\n")
-			.. _("*Language*: `%s`\n"):format(locale.language)
-        
-    --build the message
+    local message = 'Current settings for *the group*:\n\n'
 	local strings = {
-		Welcome = _("Welcome message"),
-		Extra = _("Extra"),
-		Flood = _("Anti-flood"),
-		Antibot = _("Ban bots"),
-		Silent = _("Silent mode"),
-		Rules = _("Rules"),
-		Arab = _("Arab"),
-		Rtl = _("RTL"),
+		Welcome = 'Welcome message',
+		Extra = 'Extra',
+		Flood = 'Anti-flood',
+		Antibot = 'Ban bots',
+		Silent = 'Silent mode',
+		Rules = 'Rules',
+		Arab = 'Arabic',
+		Rtl = 'RTL',
 	}
     for key, default in pairs(config.chat_settings['settings']) do
         
@@ -547,7 +534,6 @@ function misc.getSettings(chat_id)
         if misc.is_info_message_key(key) then
         	off_icon, on_icon = '👤', '👥'
         end
-        
         local db_val = db:hget(hash, key)
         if not db_val then db_val = default end
         
@@ -557,10 +543,8 @@ function misc.getSettings(chat_id)
             message = message .. string.format('%s: %s\n', strings[key], on_icon)
         end
     end
-    
-    --build the char settings lines
     hash = 'chat:'..chat_id..':char'
-    off_icon, on_icon = '🚫', '✅'
+    off_icon, on_icon = 'Off', 'On'
     for key, default in pairs(config.chat_settings['char']) do
     	db_val = db:hget(hash, key)
         if not db_val then db_val = default end
@@ -570,37 +554,31 @@ function misc.getSettings(chat_id)
             message = message .. string.format('%s: %s\n', strings[key], on_icon)
         end
     end
-    	
-    --build the "welcome" line
     hash = 'chat:'..chat_id..':welcome'
     local type = db:hget(hash, 'type')
     if type == 'media' then
-		message = message .. _("*Welcome type*: `GIF / sticker`\n")
+		message = message .. '*Welcome type*: `GIF / sticker`\n'
 	elseif type == 'custom' then
-		message = message .. _("*Welcome type*: `custom message`\n")
+		message = message .. '*Welcome type*: `custom message`\n'
 	elseif type == 'no' then
-		message = message .. _("*Welcome type*: `default message`\n")
+		message = message .. '*Welcome type*: `default message`\n'
 	end
     
     local warnmax_std = (db:hget('chat:'..chat_id..':warnsettings', 'max')) or config.chat_settings['warnsettings']['max']
     local warnmax_media = (db:hget('chat:'..chat_id..':warnsettings', 'mediamax')) or config.chat_settings['warnsettings']['mediamax']
     
-	return message .. _("Warns (`standard`): *%s*\n"):format(warnmax_std)
-				 .. _("Warns (`media`): *%s*\n\n"):format(warnmax_media)
-				 .. _("✅ = _enabled / allowed_\n")
-				 .. _("🚫 = _disabled / not allowed_\n")
-				 .. _("👥 = _sent in group (always for admins)_\n")
-				 .. _("👤 = _sent in private_")
+	return message .. '👥 = Sent in the group\n'
+				 .. '👤 = Sent via private message'
 
 end
 
 function misc.changeSettingStatus(chat_id, field)
 	local turned_off = {
-		 welcome = _("Welcome message won't be displayed from now"),
-		 extra = _("#extra commands are now available only for moderator"),
-		 flood = _("Anti-flood is now off"),
-		 rules = _("`/rules` will reply in private (for users)"),
-		 antibot = _("Bots won't be kicked if added by an user")
+		 welcome = 'Welcome message won\'t be displayed from now on.',
+		 extra = '#extra commands are now only available for moderators.',
+		 flood = 'The anti-flood plugin is now off.',
+		 rules = '/rules will respond via private message (for standard users).',
+		 antibot = 'Bots won\'t be kicked if they\'re added by an user.'
 	}
 	local turned_on = {
 		 welcome = _("Welcome message will be displayed"),
@@ -626,10 +604,10 @@ function misc.changeFloodSettings(chat_id, screm)
 	if type(screm) == 'string' then
 		if screm == 'kick' then
 			db:hset(hash, 'ActionFlood', 'ban')
-        	return _("Now flooders will be banned")
+        	return 'Users who flood will now be banned.'
         elseif screm == 'ban' then
         	db:hset(hash, 'ActionFlood', 'kick')
-        	return _("Now flooders will be kicked")
+        	return 'Users who flood will now be kicked.'
         end
     elseif type(screm) == 'number' then
     	local old = tonumber(db:hget(hash, 'MaxFlood')) or 5
@@ -638,15 +616,13 @@ function misc.changeFloodSettings(chat_id, screm)
     		new = db:hincrby(hash, 'MaxFlood', 1)
     		if new > 25 then
     			db:hincrby(hash, 'MaxFlood', -1)
-    			return _("%d is not a valid value!\n"):format(new)
-					.. ("The value should be *higher* than 3 and *lower* then 26")
+    			return 'The value should be greater than 3 but lower than 26.'
     		end
     	elseif screm < 0 then
     		new = db:hincrby(hash, 'MaxFlood', -1)
     		if new < 4 then
     			db:hincrby(hash, 'MaxFlood', 1)
-    			return _("%d is not a valid value!\n"):format(new)
-					.. ("The value should be *higher* than 3 and *lower* then 26")
+    			return 'The value should be greater than 3 but lower than 26.'
     		end
     	end
     	return string.format('%d → %d', old, new)
@@ -668,53 +644,42 @@ function misc.changeMediaStatus(chat_id, media, new_status)
 			new_status_icon = '✅'
 		end
 	end
-	db:hset('chat:'..chat_id..':media', media, new_status)
-	return _("New status = %s"):format(new_status_icon), true
+	db:hset('chat:' .. chat_id .. ':media', media, new_status)
+	local text = 'New status = %s'
+	text = text:format(new_status_icon)
+	return text, true
 end
 
 function misc.sendStartMe(msg, ln)
-    local keyboard = {inline_keyboard = {{{text = _("Start me"), url = 'https://telegram.me/'..bot.username}}}}
-	api.sendKeyboard(msg.chat.id, _("_Please message me first so I can message you_"), keyboard, true)
+    local keyboard = {inline_keyboard = {{{text = 'Start me', url = 'https://telegram.me/' .. bot.username}}}}
+	api.sendKeyboard(msg.chat.id, 'Please message me first so I can message you back', keyboard, true)
 end
-
 function misc.initGroup(chat_id)
-	
 	for set, setting in pairs(config.chat_settings) do
 		local hash = 'chat:'..chat_id..':'..set
 		for field, value in pairs(setting) do
 			db:hset(hash, field, value)
 		end
 	end
-	
-	misc.cache_adminlist(chat_id, api.getChatAdministrators(chat_id)) --init admin cache
-	
-	--save group id
+	misc.cache_adminlist(chat_id, api.getChatAdministrators(chat_id))
 	db:sadd('bot:groupsid', chat_id)
-	--remove the group id from the list of dead groups
 	db:srem('bot:groupsid:removed', chat_id)
 end
-
 function misc.remGroup(chat_id, full, call)
-	--remove group id
 	db:srem('bot:groupsid', chat_id)
-	--add to the removed groups list
 	db:sadd('bot:groupsid:removed', chat_id)
-	
 	for set,field in pairs(config.chat_settings) do
 		db:del('chat:'..chat_id..':'..set)
 	end
-	
 	db:del('cache:chat:'..chat_id..':admins') --delete the cache
 	db:hdel('bot:logchats', chat_id) --delete the associated log chat
 	db:del('chat:'..chat_id..':pin') --delete the msg id of the (maybe) pinned message
-	
 	if full then
 		for i, set in pairs(config.chat_custom_texts) do
 			db:del('chat:'..chat_id..':'..set)
 		end
 		db:del('lang:'..chat_id)
 	end
-	
 	local msg_text = '#removed '..chat_id
 	if full then
 		msg_text = msg_text..'\nfull: true'
@@ -724,41 +689,37 @@ function misc.remGroup(chat_id, full, call)
 	if call then msg_text = msg_text..'\ncall: '..call end
 	api.sendAdmin(msg_text)
 end
-
 function misc.getnames_complete(msg, blocks)
 	local admin, kicked
-	
 	if msg.from.username then
 		admin = misc.getname_link(msg.from.first_name, msg.from.username)
 	else
-		admin = '`'..msg.from.first_name:escape()..'`'
+		admin = '`' .. msg.from.first_name:escape() .. '`'
 	end
-	
 	if msg.reply then
 		if msg.reply.from.username then
 			kicked = misc.getname_link(msg.reply.from.first_name, msg.reply.from.username)
 		else
 			kicked = '`'..msg.reply.from.first_name:escape()..'`'
 		end
-	elseif msg.text:match(config.cmd..'%w%w%w%w?%w?%s(@[%w_]+)%s?') then
+	elseif msg.text:match(config.cmd .. '%w%w%w%w?%w?%s(@[%w_]+)%s?') then
 		local username = msg.text:match('%s(@[%w_]+)')
 		kicked = username:escape()
 	elseif msg.mention_id then
 		for _, entity in pairs(msg.entities) do
 			if entity.user then
-				kicked = '`'..entity.user.first_name:escape()..'`'
+				kicked = '`' .. entity.user.first_name:escape() .. '`'
 			end
 		end
-	elseif msg.text:match(config.cmd..'%w%w%w%w?%w?%s(%d+)') then
-		local id = msg.text:match(config.cmd..'%w%w%w%w?%w?%s(%d+)')
-		kicked = '`'..id..'`'
+	elseif msg.text:match(config.cmd .. '%w%w%w%w?%w?%s(%d+)') then
+		local id = msg.text:match(config.cmd .. '%w%w%w%w?%w?%s(%d+)')
+		kicked = '`' .. id .. '`'
 	end
 	
 	return admin, kicked
 end
 
 function misc.get_user_id(msg, blocks)
-	--if no user id: returns false and the msg id of the translation for the problem
 	if not msg.reply and not blocks[2] then
 		return false, "Reply to someone"
 	else
